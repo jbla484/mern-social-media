@@ -1,0 +1,27 @@
+{
+    "name": "mern-fourm",
+    "version": "1.0.0",
+    "description": "Social fourms",
+    "main": "server.js",
+    "scripts": {
+        "start": "node server",
+        "server": "nodemon server"
+    },
+    "author": "James Blankenship",
+    "license": "MIT",
+    "dependencies": {
+        "bcryptjs": "^2.4.3",
+        "config": "^3.3.9",
+        "express": "^4.18.2",
+        "express-validator": "^7.0.1",
+        "gravatar": "^1.8.2",
+        "jsonwebtoken": "^9.0.1",
+        "mongodb": "^5.7.0",
+        "mongoose": "^7.4.0",
+        "request": "^2.88.2"
+    },
+    "devDependencies": {
+        "concurrently": "^8.2.0",
+        "nodemon": "^3.0.1"
+    }
+}

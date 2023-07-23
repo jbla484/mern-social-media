@@ -1,0 +1,3 @@
+{
+    "mongoURI": "mongodb+srv://user:javascript@cluster0.csdpdie.mongodb.net/SocialNetwork?retryWrites=true&w=majority"
+}
