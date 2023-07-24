@@ -1,7 +1,7 @@
 {
-    "name": "mern-fourm",
+    "name": "mern-social-media",
     "version": "1.0.0",
-    "description": "Social fourms",
+    "description": "Social Media Platform",
     "main": "server.js",
     "scripts": {
         "start": "node server",

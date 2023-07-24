@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const gravatar = require('gravatar');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const config = require('config');
 
 const UserModel = require('../../models/User');
 
@@ -24,9 +26,8 @@ router.post(
         }
 
         const { name, email, password } = req.body;
-
         try {
-            // see if user exists
+            // check if user already exists
             let user = await UserModel.findOne({ email });
 
             if (user) {
@@ -54,11 +55,30 @@ router.post(
             const salt = await bcrypt.genSalt(10);
             user.password = await bcrypt.hash(password, salt);
 
+            // insert the user object into the database
             await user.save();
 
-            // return JWT
-            res.send('user registered');
-        } catch (err) {
+            // create payload for jwt sign function
+            const payload = {
+                user : {
+                    id: user.id,
+                },
+            };
+
+            // generate a jwt
+            jwt.sign(
+                payload, 
+                config.get('jwtSecret'), // pass in our secret from /config/default.json
+                { 
+                    expiresIn: 3600 // seconds until expiration
+                }, 
+                (err, token) => { // callback function to handle token response
+                    if(err) throw err;
+                    res.json({token}); // return token to client
+                }
+            );
+        } 
+        catch (err) {
             console.error(err.message);
             res.status(500).send('Server error');
         }
