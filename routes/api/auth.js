@@ -26,9 +26,9 @@ router.get('/', auth, async (req, res) => {
 // @access  Public
 router.post(
     '/',
+    // middleware function from 'express-validator' import that
+    // checks the input object properties by name to ensure they meet a custom criteria
     [
-        // middleware function from 'express-validator' import that
-        // checks the input object properties by name to ensure they meet a custom criteria
         check('email', 'Email must be valid').isEmail(),
         check('password', 'Password required').exists(),
     ],
