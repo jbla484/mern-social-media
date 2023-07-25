@@ -20,7 +20,7 @@ router.post(
         // middleware function from 'express-validator' import that
         // checks the input object properties by name to ensure they meet a custom criteria
         [
-            check('status', 'Status is required').not().isEmpty(),
+            check('role', 'Role is required').not().isEmpty(),
             check('skills', 'Skills is required').not().isEmpty(),
         ],
     ],
@@ -30,11 +30,50 @@ router.post(
         if (!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.array() });
         }
+
+        // pull all fields out of request body
+        const {
+            company,
+            website,
+            location,
+            bio,
+            role,
+            githubusername,
+            skills,
+            youtube,
+            facebook,
+            twitter,
+            instagram,
+            linkedin,
+        } = req.body;
+
+        // Build the profile object
+        const profile = {};
+        profile.user = req.user.id;
+        if (company) profile.company = company;
+        if (website) profile.website = website;
+        if (location) profile.location = location;
+        if (bio) profile.bio = bio;
+        if (role) profile.role = role;
+        if (githubusername) profile.githubusername = githubusername;
+        if (skills) {
+            profile.skills = skills.split(',').map((skill) => skill.trim());
+        }
+
+        // Build the social object
+        profile.social = {};
+        if (youtube) profile.social.youtube = youtube;
+        if (facebook) profile.social.facebook = facebook;
+        if (twitter) profile.social.twitter = twitter;
+        if (instagram) profile.social.instagram = instagram;
+        if (linkedin) profile.social.linkedin = linkedin;
+
+        res.send(profile);
     }
 );
 
 // @route   GET api/profile/me
-// @desc    Get current users profile
+// @desc    Get current user's profile
 // @access  Private
 router.get('/me', auth, async (req, res) => {
     try {
@@ -49,7 +88,7 @@ router.get('/me', auth, async (req, res) => {
         if (!profile) {
             return res
                 .status(400)
-                .json({ ermsgrors: 'There is no profile for this user' });
+                .json({ msg: 'There is no profile for this user' });
         }
 
         // Send the profile back to the client
