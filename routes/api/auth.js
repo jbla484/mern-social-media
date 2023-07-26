@@ -9,7 +9,7 @@ const router = express.Router();
 const { check, validationResult } = require('express-validator');
 
 // @route   GET api/auth
-// @desc
+// @desc    Find user by id
 // @access  Public
 router.get('/', auth, async (req, res) => {
     try {
@@ -22,7 +22,7 @@ router.get('/', auth, async (req, res) => {
 });
 
 // @route   POST api/auth
-// @desc
+// @desc    Generate a json web token and log the user in
 // @access  Public
 router.post(
     '/',
@@ -73,7 +73,7 @@ router.post(
                 config.get('jwtSecret'),
                 {
                     // seconds until expiration
-                    expiresIn: 3600,
+                    expiresIn: 3600000, // 3600 is an hour
                 },
                 // callback function to handle token response
                 (err, token) => {

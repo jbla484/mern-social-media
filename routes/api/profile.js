@@ -3,6 +3,7 @@ const router = express.Router();
 
 const auth = require('../../middleware/auth');
 
+// import the models required for a profile
 const User = require('../../models/User');
 const Profile = require('../../models/Profile');
 
@@ -97,6 +98,7 @@ router.post(
             // save profile to database
             await userProfile.save();
 
+            // return profile to client
             res.json(userProfile);
         } catch (err) {
             // print and return caught error
@@ -111,18 +113,14 @@ router.post(
 // @access  Private
 router.get('/me', auth, async (req, res) => {
     try {
-        // search the database for a user profile
+        // search the database for a user profile, if found populate with user properties
         const profile = await Profile.findOne({
             user: req.user.id,
         })
             // populate the object with the name and avatar from the database query
-            .populate({
-                path: 'users', // populate blogs
-                populate: {
-                    path: 'name', // in blogs, populate comments
-                },
-                strictPopulate: false,
-            });
+            .populate([
+                { path: 'user', strictPopulate: false, select: 'name avatar' },
+            ]);
 
         // Return if no user profile found
         if (!profile) {
@@ -134,6 +132,7 @@ router.get('/me', auth, async (req, res) => {
         // Send the profile back to the client
         res.json(profile);
     } catch (err) {
+        // print and return caught error
         console.error(err.message);
         res.status(500).send('Server error');
     }
@@ -145,16 +144,20 @@ router.get('/me', auth, async (req, res) => {
 router.get('/', async (req, res) => {
     try {
         //get all profiles
-        const profiles = await Profile.find({}).populate('users', [
-            'name',
-            'avatar',
-        ]);
+        const profiles = await Profile.find({})
+            // populate the object with the name and avatar from the database query
+            .populate([
+                { path: 'user', strictPopulate: false, select: 'name avatar' },
+            ]);
 
+        // return the profiles back to the client
         res.json(profiles);
     } catch (err) {
+        // print and return caught error
         console.error(err.message);
         res.status(500).send('Server error');
     }
 });
 
+// export the router to other files
 module.exports = router;

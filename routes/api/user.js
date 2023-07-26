@@ -9,7 +9,9 @@ const User = require('../../models/User');
 
 const { check, validationResult } = require('express-validator');
 
-router.get('/', (req, res) => res.send('user route'));
+// @route   POST api/user
+// @desc    Create a user
+// @access  Private
 router.post(
     '/',
     [
