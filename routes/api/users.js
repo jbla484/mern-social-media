@@ -5,7 +5,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const config = require('config');
 
-const UserModel = require('../../models/User');
+const User = require('../../models/User');
 
 const { check, validationResult } = require('express-validator');
 
@@ -28,7 +28,7 @@ router.post(
         const { name, email, password } = req.body;
         try {
             // check if user already exists
-            let user = await UserModel.findOne({ email });
+            let user = await User.findOne({ email });
 
             if (user) {
                 return res.status(400).json({
@@ -44,7 +44,7 @@ router.post(
             });
 
             // create user object
-            user = new UserModel({
+            user = new User({
                 name,
                 email,
                 password,
@@ -60,25 +60,25 @@ router.post(
 
             // create payload for jwt sign function
             const payload = {
-                user : {
+                user: {
                     id: user.id,
                 },
             };
 
             // generate a jwt
             jwt.sign(
-                payload, 
+                payload,
                 config.get('jwtSecret'), // pass in our secret from /config/default.json
-                { 
-                    expiresIn: 3600 // seconds until expiration
-                }, 
-                (err, token) => { // callback function to handle token response
-                    if(err) throw err;
-                    res.json({token}); // return token to client
+                {
+                    expiresIn: 3600, // seconds until expiration
+                },
+                (err, token) => {
+                    // callback function to handle token response
+                    if (err) throw err;
+                    res.json({ token }); // return token to client
                 }
             );
-        } 
-        catch (err) {
+        } catch (err) {
             console.error(err.message);
             res.status(500).send('Server error');
         }

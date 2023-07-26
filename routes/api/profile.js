@@ -3,8 +3,8 @@ const router = express.Router();
 
 const auth = require('../../middleware/auth');
 
-const UserModel = require('../../models/User');
-const ProfileModel = require('../../models/Profile');
+const User = require('../../models/User');
+const Profile = require('../../models/Profile');
 
 const { check, validationResult } = require('express-validator');
 
@@ -31,7 +31,7 @@ router.post(
             return res.status(400).json({ errors: errors.array() });
         }
 
-        // pull all fields out of request body
+        // pull all properties out of request body
         const {
             company,
             website,
@@ -60,7 +60,7 @@ router.post(
             profile.skills = skills.split(',').map((skill) => skill.trim());
         }
 
-        // Build the social object
+        // Build the profile social object
         profile.social = {};
         if (youtube) profile.social.youtube = youtube;
         if (facebook) profile.social.facebook = facebook;
@@ -68,7 +68,41 @@ router.post(
         if (instagram) profile.social.instagram = instagram;
         if (linkedin) profile.social.linkedin = linkedin;
 
-        res.send(profile);
+        try {
+            // check if profile already exists
+            let userProfile = await Profile.findOne({
+                user: profile.user,
+            });
+
+            // update profile if found
+            if (userProfile) {
+                userProfile = await Profile.findOneAndUpdate(
+                    // find the profile by id
+                    {
+                        user: profile.user,
+                    },
+                    // set the fields with the profile object we created above
+                    { $set: profile },
+                    // create a new one
+                    { new: true }
+                );
+
+                // return the profile to the client
+                return res.json(userProfile);
+            }
+
+            // create profile if not found
+            userProfile = new Profile(profile);
+
+            // save profile to database
+            await userProfile.save();
+
+            res.json(userProfile);
+        } catch (err) {
+            // print and return caught error
+            console.error(err.message);
+            res.status(500).send('Server error');
+        }
     }
 );
 
@@ -78,11 +112,17 @@ router.post(
 router.get('/me', auth, async (req, res) => {
     try {
         // search the database for a user profile
-        const profile = await ProfileModel.findOne({
+        const profile = await Profile.findOne({
             user: req.user.id,
         })
             // populate the object with the name and avatar from the database query
-            .populate('user', ['name', 'avatar']);
+            .populate({
+                path: 'users', // populate blogs
+                populate: {
+                    path: 'name', // in blogs, populate comments
+                },
+                strictPopulate: false,
+            });
 
         // Return if no user profile found
         if (!profile) {
@@ -99,9 +139,22 @@ router.get('/me', auth, async (req, res) => {
     }
 });
 
-// @route   POST api/auth
-// @desc
+// @route   GET api/profile
+// @desc    Get all profiles
 // @access  Public
-router.post('/', (req, res) => res.send('profile post route'));
+router.get('/', async (req, res) => {
+    try {
+        //get all profiles
+        const profiles = await Profile.find({}).populate('users', [
+            'name',
+            'avatar',
+        ]);
+
+        res.json(profiles);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+});
 
 module.exports = router;

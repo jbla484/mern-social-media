@@ -2,7 +2,7 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const config = require('config');
 const auth = require('../../middleware/auth');
-const UserModel = require('../../models/User');
+const User = require('../../models/User');
 const jwt = require('jsonwebtoken');
 
 const router = express.Router();
@@ -13,7 +13,7 @@ const { check, validationResult } = require('express-validator');
 // @access  Public
 router.get('/', auth, async (req, res) => {
     try {
-        const user = await UserModel.findById(req.user.id).select('-password');
+        const user = await User.findById(req.user.id).select('-password');
         res.json({ user });
     } catch (err) {
         console.error(err.message);
@@ -44,7 +44,7 @@ router.post(
 
         try {
             // check if user already exists and return error if they do
-            let user = await UserModel.findOne({ email });
+            let user = await User.findOne({ email });
             if (!user) {
                 return res.status(400).json({
                     errors: [{ msg: 'Invalid credentials' }],
