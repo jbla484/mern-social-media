@@ -1,4 +1,6 @@
 {
     "mongoURI": "mongodb+srv://user:javascript@cluster0.csdpdie.mongodb.net/SocialNetwork?retryWrites=true&w=majority",
-    "jwtSecret": "mysecrettoken"
+    "jwtSecret": "mysecrettoken",
+    "githubclientid": "bc573067ecab13d11df9",
+    "githubSecret": "cabbaaf2907af01a995003c53d0cb2bb63f3dda0"
 }
